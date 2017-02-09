@@ -52,7 +52,34 @@
 		left:545px;
 	}
 
+	.form-inline {
+  	margin:20px;
+  	padding:5px;
+  	background-color: #eee
+	}
+
+	.form-inline label {
+	margin-right: 10px;
+	}
+
+	.form-inline select {
+	margin-left: 5px;
+	}
+
 </style>
+
+<script>
+
+ $(document).ready(function(){
+
+   $("input, select").change( function() { 
+    	update_params( $(this).closest("form") );
+   });
+
+   update_params($("form"));
+
+});
+</script>
 
 
 </head>
@@ -60,12 +87,108 @@
 <body>
 	<div class="container">
 		<div class="text-center">
-			<h3>easyscore</h3>
+			<h3>Virtual Megaband: interactive duet</h3>
+			
 			<div class="reader">
 				<div class="musicbox" id="mus1"></div>
 				<div class="musicbox" id="mus2"></div>
-			</div>	
-			<div id="init" class="btn btn-primary">init</div>
+			</div>
+
+			<div class="reader">
+				<div class="musicbox" id="mus1"></div>
+				<div class="musicbox" id="mus2"></div>
+			</div>		
+			
+			<div id="gen" class="btn btn-primary">Generate Music</div>
+
+			<script>
+			var quantize = 8; // or 2 or 4 ... for regularity
+			var density = 1; // number of notes per bar
+			var degrees = [1, 3, 5];  // available scale degrees
+			var range = [60, 72];
+			var key = 0;
+
+			var unison = false;
+			var repetitions = 4; // number of repetitions before new bar is generated, even if no change in parameters;
+
+			function update_params(form) {
+				quantize = form.find(".quantize").val() * 1;
+				density = form.find(".density").val() * 1;	
+				range = [form.find(".min").val() * 1, form.find(".max").val() * 1];	
+				key = form.find(".key").val() * 1;	
+				repetitions = form.find(".repetitions").val() * 1;	
+				unison = form.find(".unison").prop("checked");
+
+				degrees = [];
+				for(d=1;d<8;d++) {
+					if (form.find(".deg" + d).prop("checked")) degrees.push(d)
+				}
+			}
+
+			</script>
+
+			<!-- form that goes with these parameters -->
+
+			<form class="form-inline" action="javascript:void(0);" >
+
+				<label for="quantize">quantize<select class="quantize" class="form-control">
+					<option value="8">1/8</option>
+					<option value="4">1/4</option>
+					<option value="2">1/2</option>
+				</select></label>
+
+				<label for="density">density
+					<input type="number" class="density" value="4" min="1" max="8" step="1"/></input>
+				</label>
+
+				<label for="min">min
+					<input type="number" class="min" value="60" min="55" max="77" step="1"/></input>
+				</label>
+
+				<label for="max">max
+					<input type="number" class="max" value="72" min="55" max="77" step="1"/></input>
+				</label>
+
+				<label for="key">key<select class="key" class="form-control">
+					<option value="0">C</option>
+					<option value="1">C#</option>
+					<option value="2">D</option>
+					<option value="3">Eb</option>
+					<option value="4">E</option>
+					<option value="5">F</option>
+					<option value="6">F#</option>
+					<option value="7">G</option>
+					<option value="8">Ab</option>
+					<option value="9">A</option>
+					<option value="10">Bb</option>
+					<option value="11">B</option>
+				</select></label>
+
+				<br>
+
+				<label for="deg1">1 <input type="checkbox" class="deg1" checked="checked"> </label>
+				<label for="deg2">2 <input type="checkbox" class="deg2"> </label>
+				<label for="deg3">3 <input type="checkbox" class="deg3" checked="checked"> </label>
+				<label for="deg4">4 <input type="checkbox" class="deg4"> </label>
+				<label for="deg5">5 <input type="checkbox" class="deg5" checked="checked"> </label>
+				<label for="deg6">6 <input type="checkbox" class="deg6"> </label>
+				<label for="deg7">7 <input type="checkbox" class="deg7"> </label>
+				
+				<br>
+				
+				<label for="repetitions">repetitions
+					<input type="number" class="repetitions" value="2" min="1" max="8" step="1"/></input>
+				</label>
+
+				<label for="unison">unison
+					<input type="checkbox" name="unison" checked="unchecked">
+				</label>
+
+				
+
+
+			</form>
+
 		</div>
 	</div>
 </body>
@@ -133,14 +256,6 @@ function draw_music(sel, str) {
 	fact.draw();
 }
 
-var quantize = 8; // or 2 or 4 ... for regularity
-var density = 1; // number of notes per bar
-var degrees = [1, 3, 5];  // available scale degrees
-var range = [60, 72];
-var key = 0;
-
-var unison = false;
-var rep = 4; // number of repetitions before new bar is generated, even if no change in parameters;
 
 const major = [0, 2, 4, 5, 7, 9, 11];
 
@@ -222,16 +337,7 @@ function generate () {
 
 
 
-function init() {
-
-	/*
-	var notes = [];
-	var quarters = Math.random()>0.5;
-	var num = quarters ? 4 : 8;
-    var nv = quarters ? 'q' : '8';
-
-	for(;notes.length < num;)notes.push([60, 62, 64, 65, 67, 69, 71, 72][Gf.rrnd(0,7)]);
-		*/
+function gen() {
 
 	var str = generate();
 	console.log(str);
@@ -241,7 +347,7 @@ function init() {
 
 // control actions
 
-$("#init").click(init);
+$("#gen").click(gen);
 
 </script>
 </html>
