@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+
+<style>
+  	svg {
+  		width: 100%;
+  	}
+
+  	div.reader {
+  		position:relative;
+  		width:1100px;
+  		height:220px;
+  		padding:5px;
+  		margin:auto;
+  	}
+
+	.musicbox {
+		position:absolute;
+
+		border: 2px;
+		border-style: solid;
+		width: 540px;
+		height:160px;
+		margin: auto;
+	}
+
+	#mus1 {
+		left:0px;
+	}
+
+	#mus2 {
+		left:545px;
+	}
+
+</style>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="text-center">
+			<h3>easyscore</h3>
+			<div class="reader">
+				<div class="musicbox" id="mus1"></div>
+				<div class="musicbox" id="mus2"></div>
+			</div>	
+			<div id="init" class="btn btn-primary">init</div>
+		</div>
+	</div>
+</body>
+
+<script>
+
+// easy score
+
+var vf = Vex.Flow;
+
+// Create an SVG renderer and attach it to the DIV element named "boo".
+
+
+
+/// helper functions
+
+function keynum_to_easynote (keynum) {
+
+	var oct = Math.floor( keynum / 12) - 1;
+ 	var pc = keynum % 12;
+
+ 	var notestr = vf.integerToNote(pc) + oct;
+
+ 	return notestr;
+ }
+
+function addOneVoice(fact, keynums, nvs, clef, timesig) {
+ 	
+ 	var score = fact.EasyScore();
+ 	var system = fact.System();
+
+ 	var note_strings = [];
+ 	var nv;
+
+ 	for (k=0;k<keynums.length;k++)
+ 	{
+ 		if (!(typeof nvs[k] === "undefined")) { nv = nvs[k] };
+ 		note_strings.push( keynum_to_easynote(keynums[k]) + "/" + nv )
+ 	}
+
+ 	var stave = system.addStave({
+		 voices: [score.voice(score.notes( note_strings.join(", ")))]
+	});
+
+	stave.addClef(clef).addTimeSignature(timesig);
+	stave.setEndBarType(vf.Barline.type.REPEAT_END);
+
+	stave.setBegBarType(vf.Barline.type.REPEAT_BEGIN);
+
+ }
+
+// important functions
+
+function draw_music(sel, notes, durs) {
+
+	$("#" + sel + " svg").remove();
+
+	var fact = new vf.Factory({renderer: {selector: sel}});
+
+	addOneVoice(fact, notes, durs, 'treble', '4/4');
+
+	fact.draw();
+}
+
+function init() {
+	var notes = [];
+	var quarters = Math.random()>0.5;
+	var num = quarters ? 4 : 8;
+    var nv = quarters ? 'q' : '8';
+
+	for(;notes.length < num;)notes.push([60, 62, 64, 65, 67, 69, 71, 72][Gf.rrnd(0,7)]);
+
+	draw_music("mus1", notes, [nv]);
+	draw_music("mus2", notes, [nv]);
+}
+
+// control actions
+
+$("#init").click(init);
+
+</script>
+</html>
+
+
+

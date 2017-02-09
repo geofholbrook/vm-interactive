@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  
+
+<style>
+
+	body {
+		background-color: black;
+	}
+
+	@keyframes grow {
+    0% {transform: scale(0.3,0.3);}
+    33% {transform: scale(1,1);}
+    66% {transform: scale(1,1);}
+    100% {transform: scale(0,0);}
+    
+}
+
+	.obj {
+		position:absolute;
+		
+		animation-name: grow;
+    	animation-duration: 2s;
+	}
+
+</style>
+
+<script>
+
+
+const size = 250;
+
+var counter = 0;
+
+function make_object (x,y) {
+	var new_obj = $("#tmp").clone(true);
+
+	new_obj.attr("id", "obj" + counter++);
+	new_obj.css( { 'left': (x-size/2), 'top':(y-size/2)})
+	new_obj.appendTo( $("body") );
+	new_obj.show();
+}
+
+
+$(document).ready(function(){
+
+	$("#tmp").on("animationend", (e)=>e.target.remove());
+
+ 	$(document).click( e=>{
+ 		make_object( e.pageX, e.pageY ) 
+ 	});
+
+});
+
+</script>
+
+</head>
+
+<body>
+	<img id="tmp" class="obj" style="display:none" src="http://placekitten.com.s3.amazonaws.com/homepage-samples/200/286.jpg" alt="">
+</body>
+
+
