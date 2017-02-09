@@ -4,10 +4,19 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <!-- jquery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
   <script src="scripts/vexflow-min.js"></script>
   <script src="scripts/geof.js"></script>
 
@@ -83,12 +92,8 @@ function keynum_to_easynote (keynum) {
  	return notestr;
  }
 
-function addOneVoice(fact, keynums, nvs, clef, timesig) {
- 	
- 	var score = fact.EasyScore();
- 	var system = fact.System();
-
- 	var note_strings = [];
+function simple_easystring(keynums, nvs) {
+	var note_strings = [];
  	var nv;
 
  	for (k=0;k<keynums.length;k++)
@@ -97,31 +102,131 @@ function addOneVoice(fact, keynums, nvs, clef, timesig) {
  		note_strings.push( keynum_to_easynote(keynums[k]) + "/" + nv )
  	}
 
+ 	return note_strings.join(", ");
+}
+
+function addOneVoice(fact, str, clef, timesig) {
+ 	
+ 	var score = fact.EasyScore();
+ 	var system = fact.System();
+
  	var stave = system.addStave({
-		 voices: [score.voice(score.notes( note_strings.join(", ")))]
+		 voices: [score.voice(score.notes( str ))]
 	});
 
 	stave.addClef(clef).addTimeSignature(timesig);
 	stave.setEndBarType(vf.Barline.type.REPEAT_END);
 
 	stave.setBegBarType(vf.Barline.type.REPEAT_BEGIN);
-
  }
 
 // important functions
 
-function draw_music(sel, notes, durs) {
+function draw_music(sel, str) {
 
 	$("#" + sel + " svg").remove();
 
 	var fact = new vf.Factory({renderer: {selector: sel}});
 
-	addOneVoice(fact, notes, durs, 'treble', '4/4');
+	addOneVoice(fact, str, 'treble', '4/4');
 
 	fact.draw();
 }
 
+var quantize = 8; // or 2 or 4 ... for regularity
+var density = 4; // number of notes per bar
+var degrees = [1, 3, 5];  // available scale degrees
+var range = [60, 72];
+var key = 0;
+
+var unison = false;
+var rep = 4; // number of repetitions before new bar is generated, even if no change in parameters;
+
+const major = [0, 2, 4, 5, 7, 9, 11];
+
+function choose_n_from (arr, n) {
+	var tmp = arr.slice(); // make copy of array
+	var result = [];
+	for(;result.length<n;) result.push(tmp.splice(Gf.rrnd(0, tmp.length-1), 1)[0]);
+	return result;
+}
+
+function isDegree (note, degree) {
+	var ref_pc = (key + major[degree-1]) % 12;
+	return (note%12 == ref_pc);
+}
+
+function x_to_dx (xs) {
+	dxs = [];
+	for(i=0;i<xs.length-1;i++){
+		dxs.push( xs[i+1]-xs[i]);
+	}
+	return dxs;
+}
+
+const dur_codes_8 = ["", "8", "q", "q.", "h", "h B4/r/8", "h.", "h. B4/r/8"];
+
+function onsets_to_nvs (onsets) {
+	var durs = x_to_dx (onsets.concat([quantize]));
+	return durs.map((d)=>dur_codes_8[d]);
+}
+
+function easystring (notes) {
+	var pitch_strings = notes.map((n)=>keynum_to_easynote(n[0]));
+	var nv_strings = onsets_to_nvs( notes.map((n)=>n[1]) );
+
+	var strings = [];
+
+	for (i in pitch_strings) {
+		strings.push( pitch_strings[i] + "/" + nv_strings[i]);
+	}
+
+	var first_onset = notes[0][1];
+
+	var prefix = (first_onset > 0) ? "B4/r/" + dur_codes_8[first_onset] + ", " : "";
+
+	return prefix + strings.join(", ");
+}
+
+function generate () {
+//! make a new list of onsets based on parameters
+
+	// list of available pitches
+	var bank = [];
+	for(p=range[0];p<=range[1];p++) {
+		if (degrees.some((d)=>isDegree(p, d))) bank.push(p);
+	}
+
+	// list of available onsets (in eighth notes, for the moment)
+	var obank = [];
+	for(o=0;o<quantize;o++) obank.push(o/quantize*8); // quantize better be 2, 4 or 8 ...
+
+	var pitches = [];
+	for(;pitches.length<density;) pitches.push( bank[ Gf.rrnd(0, bank.length-1)]);
+
+	var onsets = choose_n_from (obank, density);
+	
+	var notes = [];
+
+	for(p in pitches){
+		notes.push([pitches[p], onsets[p]])
+	} 	
+
+	// ascending onsets
+	notes.sort((a,b)=>a[1]-b[1]);
+
+	return easystring(notes);
+}
+
+
+
+
+
+
+
+
 function init() {
+
 	var notes = [];
 	var quarters = Math.random()>0.5;
 	var num = quarters ? 4 : 8;
@@ -129,8 +234,9 @@ function init() {
 
 	for(;notes.length < num;)notes.push([60, 62, 64, 65, 67, 69, 71, 72][Gf.rrnd(0,7)]);
 
-	draw_music("mus1", notes, [nv]);
-	draw_music("mus2", notes, [nv]);
+	draw_music("mus1", simple_easystring(notes, [nv]));
+	draw_music("mus2", simple_easystring(notes, [nv]));
+
 }
 
 // control actions
