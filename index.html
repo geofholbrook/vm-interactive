@@ -44,11 +44,11 @@
 		margin: auto;
 	}
 
-	#mus1 {
+	.mus-left {
 		left:0px;
 	}
 
-	#mus2 {
+	.mus-right {
 		left:545px;
 	}
 
@@ -89,15 +89,15 @@
 		<div class="text-center">
 			<h3>Virtual Megaband: interactive duet</h3>
 			
-			<div class="reader">
-				<div class="musicbox" id="mus1"></div>
-				<div class="musicbox" id="mus2"></div>
+			<div class="reader" id="reader1">
+				<div class="musicbox mus-left" id="mus1L"></div>
+				<div class="musicbox mus-right" id="mus1R"></div>
 			</div>
 
-			<div class="reader">
-				<div class="musicbox" id="mus1"></div>
-				<div class="musicbox" id="mus2"></div>
-			</div>		
+			<div class="reader" id="reader2">
+				<div class="musicbox mus-left" id="mus2L"></div>
+				<div class="musicbox mus-right" id="mus2R"></div>
+			</div>
 			
 			<div id="gen" class="btn btn-primary">Generate Music</div>
 
@@ -342,7 +342,7 @@ function gen() {
 	var str = generate();
 	console.log(str);
 
-	draw_music("mus1", str);
+	draw_music("mus1L", str);
 }
 
 // control actions
