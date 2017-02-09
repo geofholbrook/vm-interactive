@@ -34,19 +34,6 @@
   		margin:auto;
   	}
 
-  	.karaoke-ball {
-
-  		position:absolute;
-
-  		width:30px;
-  		height:30px;
-  		background-color: red;
-  		border-radius:15px;
-
-  		display:none;
-
-  	}
-
 	.musicbox {
 		position:absolute;
 
@@ -111,8 +98,6 @@
 			<div class="reader" id="reader1">
 				<div class="musicbox mus-left" id="mus1L"></div>
 				<div class="musicbox mus-right" id="mus1R"></div>
-
-				<div class="karaoke-ball" id="k1"></div>
 			</div>
 
 			<div class="reader" id="reader2">
@@ -199,7 +184,7 @@
 				<br>
 				
 				<label for="tempo">tempo
-					<input type="number" class="tempo" value="100" min="40" max="200" step="4"/></input>
+					<input type="number" class="repetitions" value="100" min="40" max="200" step="4"/></input>
 				</label>
 
 				<label for="repetitions">repetitions
@@ -225,77 +210,9 @@
 
 var vf = Vex.Flow;
 
-
-// beat marker
-
-const karaoke_x = 90;
-const karaoke_dx = 100;
-
-const karaoke_y = 15;
-
-var current_beat = 0;
-var rep_num = 1;
+// Create an SVG renderer and attach it to the DIV element named "boo".
 
 
-function shift_music() {
-
-	var left = $("#mus1L").css("left");
-	var right = $("#mus1R").css("left");
-
-	/// swap positions
-	$("#mus1R").css("left", left);
-    $("#mus1L").css("left", right);
-
-    /// swap IDs
-    $("#mus1R").attr("id", "tmp");
-    $("#mus1L").attr("id", "mus1R");
-    $("#tmp").attr("id", "mus1L");
-
-    // clear right musicbox
-    $("#mus1R svg").remove();
-
-};
-
-var new_measure_cued = false;
-
-function cue_new_measure () {
-
-	console.log("cue_new_measure()");
-
-	draw_music("mus1R", generate());
-	new_measure_cued = true;
-}
-
-
-function handle_repeat()
-{
-	console.log(rep_num++);
-	if (rep_num >= repetitions) {
-		if (new_measure_cued) {
-			shift_music();
-			new_measure_cued = false;
-			rep_num = 1;
-			if (repetitions == 1) cue_new_measure();
-		} 
-		else  
-		{
-			cue_new_measure();
-		}
-	}
-}
-
-function advance_beat () {
-	current_beat++;
-	$(".karaoke-ball").css( {left: karaoke_x + (karaoke_dx * (current_beat % 4)), top: karaoke_y}).show();
-
-	if (current_beat%4 == 0) {
-		handle_repeat();
-	}
-}
-
-
-
-setInterval(advance_beat, 60000/tempo);
 
 /// helper functions
 
