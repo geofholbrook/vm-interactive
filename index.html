@@ -93,12 +93,15 @@
 
 <script>
 
+
+
  $(document).ready(function(){
 
    $("input, select").change( function() { 
     	update_params( $(this).closest("form") );
    });
 
+   
    update_params($("form"));
 
 });
@@ -241,6 +244,7 @@
 var vf = Vex.Flow;
 
 
+
 // beat marker
 
 const karaoke_x = 90;
@@ -278,15 +282,19 @@ function shift_music() {
 
 var new_measure_cued = false;
 
+function transp_notes (arr, transp) {
+	return arr.map( (n)=>[ n[0]+transp, n[1] ] );
+}
+
 function cue_new_measure () {
 
 	// console.log("cue_new_measure()");
 
-	var str1 = generate();
-	var str2 = unison ? str1 : generate();
+	var g1 = generate(0);
+	var g2 = unison ? transp_notes(g1, 2) : generate(2);
 
-	draw_music("mus1R", str1);
-	draw_music("mus2R", str2);
+	draw_music("mus1R", easystring(g1));
+	draw_music("mus2R", easystring(g2));
 
 	new_measure_cued = true;
 }
@@ -424,7 +432,7 @@ function easystring (notes) {
 	return prefix + strings.join(", ");
 }
 
-function generate () {
+function generate (transp) {
 //! make a new list of onsets based on parameters
 
 	// list of available pitches
@@ -438,7 +446,7 @@ function generate () {
 	for(o=0;o<quantize;o++) obank.push(o/quantize*8); // quantize better be 2, 4 or 8 ...
 
 	var pitches = [];
-	for(;pitches.length<density;) pitches.push( bank[ Gf.rrnd(0, bank.length-1)]);
+	for(;pitches.length<density;) pitches.push( bank[ Gf.rrnd(0, bank.length-1)] + transp);
 
 	var onsets = choose_n_from (obank, density);
 	
@@ -453,15 +461,50 @@ function generate () {
 
 	// console.log(easystring(notes));
 
-	return easystring(notes);
+	return notes;
 }
 
+
+function set_deg (arr)
+{
+	for(d=1;d<8;d++) {
+		// console.log("#deg" + d);
+		$(".deg" + d).prop("checked", (arr.indexOf(d) != -1))
+	}
+	update_params($("form"));
+}
+
+function set_degrees(txt) {
+ 	switch (txt) {
+ 		case "I" :
+ 			set_deg([1,3,5]);
+ 			break;
+ 		case "ii" :
+ 			set_deg([2,4,6]);
+ 			break;
+ 		case "iii" :
+ 			set_deg([3,5,7]);
+ 			break;
+ 		case "IV" :
+ 			set_deg([4,6,1]);
+ 			break;
+ 		case "V" :
+ 			set_deg([5,7,2]);
+ 			break;
+ 		case "V7" :
+ 			set_deg([5,7,2,4]);
+ 			break;
+ 		case "vi" :
+ 			set_deg([6,1,3]);
+ 			break;
+ 	}
+}	
 
 
 function gen() {
 
 	$(".musicbox").each(function(){
-		draw_music($(this).attr("id"), generate())
+		draw_music($(this).attr("id"), easystring(generate(0)))
 	});
 
 }
@@ -469,6 +512,9 @@ function gen() {
 // control actions
 
 $("#gen").click(gen);
+
+$(".chord-btn").click( function() { set_degrees($(this).text()) });
+
 
 </script>
 </html>
