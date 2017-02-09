@@ -84,6 +84,11 @@
 	margin-right: 15px;
 	}
 
+	.chord-btn {
+		font-size: 32px;
+		width: 80px;
+	}
+
 </style>
 
 <script>
@@ -118,10 +123,11 @@
 			<div class="reader" id="reader2">
 				<div class="musicbox mus-left" id="mus2L"></div>
 				<div class="musicbox mus-right" id="mus2R"></div>
+
+				<div class="karaoke-ball" id="k2"></div>
 			</div>
 			
-			<div id="gen" class="btn btn-primary">Generate Music</div>
-
+			
 			<script>
 			var quantize = 8; // or 2 or 4 ... for regularity
 			var density = 4; // number of notes per bar
@@ -207,13 +213,22 @@
 				</label>
 
 				<label for="unison">unison
-					<input type="checkbox" name="unison" checked="unchecked">
+					<input type="checkbox" class="unison" name="unison" checked="unchecked">
 				</label>
 
 				
 
 
 			</form>
+
+			<div class="btn btn-primary chord-btn">I</div>
+			<div class="btn btn-primary chord-btn">ii</div>
+			<div class="btn btn-primary chord-btn">iii</div>
+			<div class="btn btn-primary chord-btn">IV</div>
+			<div class="btn btn-primary chord-btn">V</div>
+			<div class="btn btn-primary chord-btn">V7</div>
+			<div class="btn btn-primary chord-btn">vi</div>
+
 
 		</div>
 	</div>
@@ -238,21 +253,26 @@ var rep_num = 1;
 
 
 function shift_music() {
+	// wow could use a rewrite
 
 	var left = $("#mus1L").css("left");
 	var right = $("#mus1R").css("left");
 
 	/// swap positions
-	$("#mus1R").css("left", left);
-    $("#mus1L").css("left", right);
+	$("#mus1R, #mus2R").css("left", left);
+    $("#mus1L, #mus2L").css("left", right);
 
-    /// swap IDs
-    $("#mus1R").attr("id", "tmp");
+    /// swap IDs and classes
+    $("#mus1R").attr("id", "tmp1");
     $("#mus1L").attr("id", "mus1R");
-    $("#tmp").attr("id", "mus1L");
+    $("#tmp1").attr("id", "mus1L");
+
+    $("#mus2R").attr("id", "tmp2");
+    $("#mus2L").attr("id", "mus2R");
+    $("#tmp2").attr("id", "mus2L");
 
     // clear right musicbox
-    $("#mus1R svg").remove();
+    $("#mus1R svg, #mus2R svg").remove();
 
 };
 
@@ -260,16 +280,21 @@ var new_measure_cued = false;
 
 function cue_new_measure () {
 
-	console.log("cue_new_measure()");
+	// console.log("cue_new_measure()");
 
-	draw_music("mus1R", generate());
+	var str1 = generate();
+	var str2 = unison ? str1 : generate();
+
+	draw_music("mus1R", str1);
+	draw_music("mus2R", str2);
+
 	new_measure_cued = true;
 }
 
 
 function handle_repeat()
 {
-	console.log(rep_num++);
+	rep_num++;
 	if (rep_num >= repetitions) {
 		if (new_measure_cued) {
 			shift_music();
@@ -293,9 +318,9 @@ function advance_beat () {
 	}
 }
 
+var timer = setInterval(advance_beat, 60000/tempo);
 
 
-setInterval(advance_beat, 60000/tempo);
 
 /// helper functions
 
@@ -425,6 +450,8 @@ function generate () {
 
 	// ascending onsets
 	notes.sort((a,b)=>a[1]-b[1]);
+
+	// console.log(easystring(notes));
 
 	return easystring(notes);
 }
