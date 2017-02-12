@@ -141,15 +141,21 @@
 			var tempo = 100;
 			var unison = false;
 			var repetitions = 4; // number of repetitions before new bar is generated, even if no change in parameters;
+			var freechoice = true;
+			var delay = 0;
 
 			function update_params(form) {
 				quantize = form.find(".quantize").val() * 1;
 				density = form.find(".density").val() * 1;	
 				range = [form.find(".min").val() * 1, form.find(".max").val() * 1];	
 				key = form.find(".key").val() * 1;	
+				
+				tempo = form.find(".tempo").val() * 1;	
 				repetitions = form.find(".repetitions").val() * 1;	
 				unison = form.find(".unison").prop("checked");
-
+				delay = form.find(".delay").val() * 1;	
+				freechoice = form.find(".freechoice").prop("checked");
+				
 				degrees = [];
 				for(d=1;d<8;d++) {
 					if (form.find(".deg" + d).prop("checked")) degrees.push(d)
@@ -219,6 +225,14 @@
 					<input type="checkbox" class="unison" name="unison" checked="unchecked">
 				</label>
 
+				<label for="delay">delay
+					<input type="number" class="delay" value="0" min="-4" max="4" step="1"/></input>
+				</label>
+
+				<label for="freechoice">free note choice
+					<input type="checkbox" class="freechoice" name="freechoice" checked="checked">
+				</label>
+
 				
 
 
@@ -283,7 +297,11 @@ function shift_music() {
 var new_measure_cued = false;
 
 function transp_notes (arr, transp) {
-	return arr.map( (n)=>[ n[0]+transp, n[1] ] );
+	return arr.map( (c)=>[ c[0].map( (n) => (n==0)?0:n+transp ), c[1] ] );
+}
+
+function delay_notes (arr, delay) {
+	return arr.map ( (c)=>[ c[0], (c[1]+delay) % 8 ])
 }
 
 function cue_new_measure () {
@@ -324,6 +342,10 @@ function advance_beat () {
 	if (current_beat%4 == 0) {
 		handle_repeat();
 	}
+
+	// update tempo
+	clearInterval(timer);
+	timer = setInterval(advance_beat, 60000/tempo);
 }
 
 var timer = setInterval(advance_beat, 60000/tempo);
@@ -349,6 +371,10 @@ function simple_easystring(keynums, nvs) {
  	for (k=0;k<keynums.length;k++)
  	{
  		if (!(typeof nvs[k] === "undefined")) { nv = nvs[k] };
+ 		if (keynums[k] == 0) { 
+ 			// rest
+ 			note_strings.push( "B4/" + nv + "/r") }
+ 		else
  		note_strings.push( keynum_to_easynote(keynums[k]) + "/" + nv )
  	}
 
@@ -360,8 +386,10 @@ function addOneVoice(fact, str, clef, timesig) {
  	var score = fact.EasyScore();
  	var system = fact.System();
 
+ 	var notes = score.notes(str);
+
  	var stave = system.addStave({
-		 voices: [score.voice(score.notes( str ))]
+		 voices: [score.voice(notes)]
 	});
 
 	stave.addClef(clef).addTimeSignature(timesig);
@@ -415,21 +443,58 @@ function onsets_to_nvs (onsets) {
 	return durs.map((d)=>dur_codes_8[d]);
 }
 
+function restify_dur_code (dur_code) {
+	return dur_codes_8rest [ dur_codes_8.indexOf(dur_code) ]
+}
+
 function easystring (notes) {
-	var pitch_strings = notes.map((n)=>keynum_to_easynote(n[0]));
+	var pitch_strings = notes.map((n)=>{
+				if (n[0] == 0) {
+					return "REST"
+				}
+				else
+				if (n[0].length == 1) {
+					return keynum_to_easynote(n[0][0])
+				} 
+				else 
+				return "(" + n[0].map( keynum_to_easynote ).join(" ") + ")"  // chord
+			});
+
 	var nv_strings = onsets_to_nvs( notes.map((n)=>n[1]) );
 
 	var strings = [];
 
 	for (i in pitch_strings) {
-		strings.push( pitch_strings[i] + "/" + nv_strings[i]);
+		if (pitch_strings[i] == "REST")
+			{ strings.push ("B4/" + restify_dur_code(nv_strings[i])) } // will bug out with nv == 5 or 7
+		else strings.push( pitch_strings[i] + "/" + nv_strings[i]);
 	}
 
 	var first_onset = notes[0][1];
 
 	var prefix = (first_onset > 0) ? "B4/" + dur_codes_8rest[first_onset] + ", " : "";
 
-	return prefix + strings.join(", ");
+	var str = prefix + strings.join(", ");
+	console.log(str);
+	return str
+}
+
+function insert_rests (notes) {
+
+	console.log(notes.map((n)=>n.toString()));
+
+	var onsets = notes.map((n)=>n[1]);
+
+	console.log(onsets);
+
+	// see if there's a note on the 3rd beat (5th eighth)
+	if (onsets.indexOf(4) == -1) {
+		return notes.filter((n)=>(n[1]<4))
+			.concat(
+				[[[0],4]].concat(
+					notes.filter((n)=>(n[1]>4))));
+		}
+	else return notes
 }
 
 function generate (transp) {
@@ -438,26 +503,32 @@ function generate (transp) {
 	// list of available pitches
 	var bank = [];
 	for(p=range[0];p<=range[1];p++) {
-		if (degrees.some((d)=>isDegree(p, d))) bank.push(p);
+		if (degrees.some((d)=>isDegree(p, d))) bank.push(p + transp);
 	}
 
 	// list of available onsets (in eighth notes, for the moment)
 	var obank = [];
 	for(o=0;o<quantize;o++) obank.push(o/quantize*8); // quantize better be 2, 4 or 8 ...
 
-	var pitches = [];
-	for(;pitches.length<density;) pitches.push( bank[ Gf.rrnd(0, bank.length-1)] + transp);
+	if (!freechoice) {
+		var pitches = [];
+		for(;pitches.length<density;) pitches.push( bank[ Gf.rrnd(0, bank.length-1)]);
+	}
 
 	var onsets = choose_n_from (obank, density);
 	
 	var notes = [];
 
-	for(p in pitches){
-		notes.push([pitches[p], onsets[p]])
+	for(o in onsets){
+		var pitch;
+		if (freechoice) { pitch = bank } else pitch = [ pitches[o] ];
+		notes.push([pitch, onsets[o]])
 	} 	
 
 	// ascending onsets
 	notes.sort((a,b)=>a[1]-b[1]);
+
+	notes = insert_rests(notes);
 
 	// console.log(easystring(notes));
 
