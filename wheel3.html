@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+
+  <!-- Bootstrap  -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- jquery UI  -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+<style>
+
+  canvas {
+    position:fixed;
+  }
+
+  .floating-number {
+    position:fixed;
+    left:40%;
+    top:40%;
+    font-size: 56px;
+    font-family: Arial;
+    font-weight:bolder;
+
+    text-align: center;
+
+    height: 75px;
+    width: 75px;
+    border-radius: 50px;
+
+    color:white;
+    background-color:green;
+  }
+
+
+</style>
+
+<script>
+
+  const colors = [ "red", "orange", "yellow", "lightgreen", "darkgreen", "blue", "purple" ];
+
+  var mouse_pos = {x:0, y:0};
+
+  function pol2car(R, theta) {
+
+        var obj = { x: R * Math.cos(theta), y: R * Math.sin(theta) }
+
+        return obj
+  }
+
+  function car2pol(x, y){
+    distance = Math.sqrt(x*x + y*y)
+    radians = Math.atan2(y,x) //This takes y first
+    polarCoor = { distance:distance, radians:radians }
+    return polarCoor
+  }
+
+  function scale_to_screen(elt, pos) {
+    
+    elt.css("left", (pos.x*50)+50 + '%');
+    elt.css("top" , (pos.y*50)+50 + '%');
+  }
+
+  function scale (n, minin, maxin, minout, maxout) {
+    return (n - minin) / (maxin-minin) * (maxout - minout) + minout
+  }
+
+  function hilight (deg, on) {
+    var elt = $("#fn" + deg);
+    if (on) { 
+        elt.css({ backgroundColor: colors[deg-1] });
+      }
+      else elt.css({backgroundColor: "#ddd"})
+  }
+
+  function mod2deg (deg) {
+    return (deg + 13) % 7 + 1;
+  }
+
+  function multi_hilight(center_deg, dist) {
+    for (i=1;i<=7;i++) hilight(i, false);
+
+    if (dist < 0.1) {
+      for (i=1;i<=7;i++) hilight(i, true);
+    }
+    else
+    if (dist < 0.35) {
+      [-2, -1, 0, 1, 2].map((n)=>hilight(mod2deg(n + center_deg), true)); }
+    else
+    if (dist < 0.8) {
+      [-2, 0, 2].map((n)=>hilight(mod2deg(n + center_deg), true)); }
+    else
+      hilight(center_deg, true)
+  
+  }
+
+  function degree_zone (pos) {
+
+    var rad = car2pol(pos.x, pos.y).radians;
+
+    if (rad < Math.PI * -0.5) rad+=Math.PI*2;
+
+    var zone = Math.floor(scale(rad, Math.PI * -0.5, Math.PI * 1.5, 1, 8));
+
+    // $("#log").text([pos.x, pos.y, zone]);
+  
+    multi_hilight(zone, car2pol(pos.x, pos.y).distance);
+  
+  }
+
+
+  function init_fns () {
+    for (i=1; i<=7; i++) {
+      var elt = $("#fn" + i)
+      var angle = scale(i, 1, 8, Math.PI * -0.3, Math.PI * 1.7);
+      scale_to_screen(elt, pol2car(0.25, angle))
+      elt.css("background-color", colors[i-1]);
+    } 
+  }
+
+
+  var ring1 = 0.1;
+  var ring2 = 0.35;
+  var ring3 = 0.8; 
+
+  function ball_sizer( pos ) {
+
+    var dist = car2pol( pos.x, pos.y).distance;
+    var inzone;
+    if (dist > ring3) { inzone = scale( dist, ring3, ring3 + 0.5, -1, 1) } else
+    if (dist > ring2) { inzone = scale( dist, ring2, ring3, -1, 1) } else
+    if (dist > ring1) { inzone = scale( dist, ring1, ring2, -1, 1) } else
+                      { inzone = scale( dist, 0, ring1, 0, 1) }
+
+    var rad = scale(Math.abs(inzone), 0, 1, 2, 0.5);
+
+    $(".floating-number").css('transform', 'scale(' + rad + ')');
+
+  }
+
+  function update_display() {
+
+    degree_zone(mouse_pos);
+    ball_sizer(mouse_pos);
+
+    resize_canvas();
+
+  }
+
+  function resize_canvas(){
+            canvas = document.getElementById("canvas");
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+ $(document).ready(function(){
+
+  init_fns();
+  resize_canvas();
+
+  $(document).mousemove(function( event ) {
+    mouse_pos = {x: scale(event.pageX - 37, 0, $(document).width(), -1, 1),
+                 y: scale(event.pageY - 37, 0, $(document).height(), -1, 1)};
+
+    update_display();
+
+
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+      var radius = 380;
+
+      context.beginPath();
+      context.arc(centerX+37, centerY-37, radius, 0, 2 * Math.PI, false);
+      context.lineWidth = 2;
+      context.strokeStyle = '#ddd';
+      context.stroke();
+
+  });
+
+  /// STUFF IN HERE
+
+});
+</script>
+</head>
+
+<body onresize="resize_canvas()">
+    
+
+    <div class="text-center">
+      <h2>move mouse to turn scale degrees on and off</h2>
+    </div>
+
+    <canvas id="canvas">Your browser doesn't support canvas</canvas>
+
+
+    <div id="log"></div>
+
+    <div class="floating-number" id="fn1">1</div>
+    <div class="floating-number" id="fn2">2</div>
+    <div class="floating-number" id="fn3">3</div>
+    <div class="floating-number" id="fn4">4</div>
+    <div class="floating-number" id="fn5">5</div>
+    <div class="floating-number" id="fn6">6</div>
+    <div class="floating-number" id="fn7">7</div>
+</body>
+
+
+
+
+
+
+
+
+
+
+
