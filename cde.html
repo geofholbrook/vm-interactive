@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+  <style>
+
+    body {
+      background-color: #666;
+    }
+
+    .big {
+      font-size: 350px;
+      font-weight: bold;
+      /*border: solid;*/
+      visibility: hidden;
+    }
+  </style>
+
+<script>
+
+var IDs = ["#C", "#D", "#E"];
+
+
+ $(document).ready(function(){
+
+  /// STUFF IN HERE
+  // css('visibility','hidden')
+
+  $( "body" ).keydown(function(e) {
+    $(IDs[e.keyCode-49]).css('visibility','visible');
+  });
+
+  $( "body" ).keyup(function(e) {
+    console.log (IDs[e.keyCode-49]);
+    $(IDs[e.keyCode-49]).css('visibility','hidden');
+  });
+
+});
+</script>
+</head>
+
+<body>
+  <div class="text-center">
+    <h2 style="color:white">press keys 1, 2, and 3 to light up notes</h2>
+
+    <span class="big" style="color: red" id="C">C</span>
+    <span class="big" style="color: orange" id="D">D</span>
+    <span class="big" style="color: #fe0" id="E">E</span>
+  </div>
+</body>
+
