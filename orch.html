@@ -44,7 +44,7 @@
   // css('visibility','hidden')
 
   $( "body" ).keydown(function(e) {
-    //console.log("#L" + (e.keyCode-48))
+    console.log(e.keyCode);
     $("#L" + (e.keyCode-48)).css('visibility','visible');
   });
 
