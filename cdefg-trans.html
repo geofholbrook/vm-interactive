@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- jquery -->
+  <script src="scripts/jquery-3.1.1.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="scripts/bootstrap.min.css">
+  <script src="scripts/bootstrap.min.js"></script>
+
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+  <style>
+
+    body {
+      background-color: #666;
+    }
+
+    table {
+      margin: auto;
+    }
+
+    .big {
+      font-size: 200px;
+      font-weight: bold;
+      /*border: solid;*/
+      visibility: hidden;
+      color: white;
+      width: 200px;
+    }
+
+    .c {
+      color: lightgreen;
+    }
+
+    .bb {
+      color: yellow;
+    }
+
+    .eb {
+      color: lightblue;
+    }
+  </style>
+
+<script>
+
+
+ $(document).ready(function(){
+
+  /// STUFF IN HERE
+  // css('visibility','hidden')
+
+  $( "body" ).keydown(function(e) {
+    //console.log("#L" + (e.keyCode-48))
+    $("#L" + (e.keyCode-48)).css('visibility','visible');
+    $("#K" + (e.keyCode-48)).css('visibility','visible');
+    $("#J" + (e.keyCode-48)).css('visibility','visible');
+  });
+
+  $( "body" ).keyup(function(e) {
+    $("#L" + (e.keyCode-48)).css('visibility','hidden');
+    $("#K" + (e.keyCode-48)).css('visibility','hidden');
+    $("#J" + (e.keyCode-48)).css('visibility','hidden');
+  });
+
+});
+</script>
+</head>
+
+<body>
+  <div class="text-center">
+    <h2 style="color:white">press number keys to light up notes</h2>
+<table>
+    <tr>
+    <td class="big c" id="L1">C</td>
+    <td class="big c" id="L2">D</td>
+    <td class="big c" id="L3">E</td>
+    <td class="big c" id="L4">F</td>
+    <td class="big c" id="L5">G</td>
+    </tr>
+
+    <tr>
+    <td class="big bb" id="K1">Bb</td>
+    <td class="big bb" id="K2">C</td>
+    <td class="big bb" id="K3">D</td>
+    <td class="big bb" id="K4">Eb</td>
+    <td class="big bb" id="K5">F</td>
+    </tr>
+
+    <tr>
+    <td class="big eb" id="J1">Eb</td>
+    <td class="big eb" id="J2">F</td>
+    <td class="big eb" id="J3">G</td>
+    <td class="big eb" id="J4">Ab</td>
+    <td class="big eb" id="J5">Bb</td>
+  </tr>
+  </table>
+  </div>
+</body>
+
