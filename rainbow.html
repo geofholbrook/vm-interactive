@@ -22,17 +22,23 @@
 
   <script>
 
-  var slider_positions = [3, 3, 3];
+  var slider_positions = [0, 0, 0];
 
-  var colors = ["#6699ff", "#cc00ff", "#ff5c33"];
+  var colors = ["white", "#6699ff", "#cc00ff", "#ff5c33"];
 
-  function set_stripe(row, stripe, color)
+  var texts = ["", "", ""];
+
+  function set_stripe(row, stripe, i, notext)
   {
+    var num = parseInt(i) + 1;
+
+
     select = "#row" + row + "-" + stripe;
 
-    console.log(select, color);
+    // console.log(select, color);
 
-    $(select).css("background-color", color);
+    $(select).css("background-color", colors[num]);
+    if (!notext) { $(select).html( texts[i] ); } else $(select).html("");
   }
 
 
@@ -40,17 +46,17 @@
     var value_colors = [ [], [], [], [] ];
 
     for (i in slider_positions) {
-      value_colors[ slider_positions[i] ].push (colors[i]);
+      value_colors[ slider_positions[i] ].push (i);
     }
 
     for (k in value_colors) {
       for (j=0;j<3;j++) {
-        set_stripe(k, j, "white");
+        set_stripe(k, j, -1);
       }
 
       if (value_colors[k].length == 1) {
         for (j=0;j<3;j++) {
-          set_stripe(k, j, value_colors[k][0]);
+          set_stripe(k, j, value_colors[k][0], (j>0));
         }
       }
       else
@@ -60,15 +66,24 @@
 
     }
 
-    console.log(value_colors);
+    // console.log(value_colors);
   }
 
   var num_knobs = 3;
 
   function set_knob_colors () {
     for (k=0;k<num_knobs;k++) {
-      $("#knob" + k).css("background-color", colors[k])
+      $("#knob" + k).css("background-color", colors[k+1])
     }
+  }
+
+  function text_submit() {
+    // lazy!
+    texts[0] = $("#red-text").val();
+    texts[1] = $("#purple-text").val();
+    texts[2] = $("#blue-text").val();
+
+    update_rainbow();
   }
 
   $(document).ready(function(){
@@ -144,6 +159,11 @@
     z-index: 1;
     width: 100%;
     height:50px;
+
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    font-family: arial;
   }
 
   /*#row2-1 {
@@ -177,12 +197,17 @@
     height: 75px;
     width: 67px;
     position:absolute;
-    bottom:4px;
+    top:4px;
     left:4px;
 
     box-shadow: 0px 0px 10px grey;
   }
 
+  .text-controls {
+    position: absolute;
+    top:0;
+
+  }
 
 
 </style>
@@ -201,10 +226,10 @@
 
       <div class="table-container"><table>
         <tr>
-          <td><span class="cell"><img src="images/half.png"></span></td>
-          <td><span class="cell"></span></td>
-          <td><span class="cell"><img src="images/half.png"></span></td>
-          <td><span class="cell"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
         </tr>
       </table></div>
     </div>
@@ -214,6 +239,25 @@
       <div class="rowstripe" id="row1-0"></div>
       <div class="rowstripe" id="row1-1"></div>
       <div class="rowstripe" id="row1-2"></div>
+
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+
+        </tr>
+      </table></div>
+
+    </div>
+
+    <div class="row" id="row2">
+
+      <div class="rowstripe" id="row2-0"></div>
+      <div class="rowstripe" id="row2-1"></div>
+      <div class="rowstripe" id="row2-2"></div>
 
       <div class="table-container"><table>
         <tr>
@@ -225,24 +269,6 @@
       </table></div>
     </div>
     
-    <div class="row" id="row2">
-
-      <div class="rowstripe" id="row2-0"></div>
-      <div class="rowstripe" id="row2-1"></div>
-      <div class="rowstripe" id="row2-2"></div>
-
-
-      <div class="table-container"><table>
-        <tr>
-          <td><span class="cell"><img src="images/eighths.png"></span></td>
-          <td><span class="cell"><img src="images/eighths.png"></span></td>
-          <td><span class="cell"><img src="images/eighths.png"></span></td>
-          <td><span class="cell"><img src="images/eighths.png"></span></td>
-        </tr>
-      </table></div>
-
-    </div>
-
     <div class="row" id="row3">
 
       <div class="rowstripe" id="row3-0"></div>
@@ -252,12 +278,13 @@
 
       <div class="table-container"><table>
         <tr>
-          <td><span class="cell"><img src="images/rest.png"></span></td>
-          <td><span class="cell"><img src="images/rest.png"></span></td>
-          <td><span class="cell"><img src="images/rest.png"></span></td>
-          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
         </tr>
       </table></div>
+
     </div>
 
   </div>
@@ -280,7 +307,23 @@
         <div class="slider-knob" id="knob2">
          </div>
       </div>
+    </div>
 
+    <div class="text-controls" style="display:inline">
+      <form>
+        RED:<br>
+        <input type="text" id="red-text" value="">
+        <br>
+        PURPLE:<br>
+        <input type="text" id="purple-text" value="">
+        <br>
+        BLUE:<br>
+        <input type="text" id="blue-text" value="">
+        <br>
+
+        <br>
+        <input type="button" value="Update" onclick="text_submit()">
+      </form> 
     </div>
 
   </div> 
