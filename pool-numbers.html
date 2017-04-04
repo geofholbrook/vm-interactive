@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- jquery -->
+  <script src="scripts/jquery-3.1.1.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="scripts/bootstrap.min.css">
+  <script src="scripts/bootstrap.min.js"></script>
+
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+<style>
+  body {
+    background-color: #444
+
+  }
+
+  #main {
+    background-color: white;
+    border: solid;
+    border-color: red;
+    margin: auto;
+    position: relative;
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+    border: 1px;
+
+    position: absolute;
+    left: 0px;
+    right: 0px;
+  }
+
+  .floating-number {
+    position:absolute;
+    left:40%;
+    top:40%;
+    font-size: 56px;
+    font-family: Arial;
+    font-weight:bolder;
+
+    text-align: center;
+
+    height: 75px;
+    width: 75px;
+    border-radius: 50px;
+
+    color:white;
+    background-color:green;
+  }
+
+
+</style>
+
+<script>
+
+  var colors = [ "red", "#fe0", "darkgreen", "pink", "orange", "lightgreen", "purple"  ];
+
+  var mouse_pos = {x:0, y:0};
+
+  function pol2car(R, theta) {
+
+        var obj = { x: R * Math.cos(theta), y: R * Math.sin(theta) }
+
+        return obj
+  }
+
+  function car2pol(x, y){
+    distance = Math.sqrt(x*x + y*y)
+    radians = Math.atan2(y,x) //This takes y first
+    polarCoor = { distance:distance, radians:radians }
+    return polarCoor
+  }
+
+  function scale (n, minin, maxin, minout, maxout) {
+    return (n - minin) / (maxin-minin) * (maxout - minout) + minout
+  }
+
+  function scale_coords (elt, pos) {
+   
+    var left = scale(pos.x, -1, 1, 0, elt.width());
+    var top = scale(pos.y, -1, 1, 0, elt.height());
+
+    return {x: left, y: top};
+  }
+
+  function position_in_main(elt, pos) {
+    // centers at scaled pos, where pos coords are between -1 and 1
+    var scaled = scale_coords( $('#main'), pos);
+
+    elt.css("left", ( scaled.x - Math.round(elt.width() / 2))); // px?
+    elt.css("top", ( scaled.y - Math.round(elt.height() / 2))); // px?
+  }
+
+  function hilight (deg, on) {
+    var elt = $("#fn" + deg);
+    if (on) { 
+        elt.css({ backgroundColor: colors[deg-1] });
+      }
+      else elt.css({backgroundColor: "#ddd"})
+  }
+
+  function mod2deg (deg) {
+    return (deg + 13) % 7 + 1;
+  }
+
+  var radii = [0.1, 0.4, 0.7, 0.95];
+
+  function multi_hilight(center_deg, dist) {
+    for (i=1;i<=7;i++) hilight(i, false);
+
+    if (dist < radii[0]) {} 
+    else
+    if (dist < radii[1]) {
+            hilight(center_deg, true)
+    }    
+    else
+    if (dist < radii[2]) {
+           [-1, 0, 1].map((n)=>hilight(mod2deg(n + center_deg), true)); 
+    }
+    else
+    if (dist < radii[3]) {
+      [-2, -1, 0, 1, 2].map((n)=>hilight(mod2deg(n + center_deg), true)); 
+      }
+    else
+      for (i=1;i<=7;i++) hilight(i, true);
+
+
+  }
+
+  function degree_zone (pos) {
+
+    var rad = car2pol(pos.x, pos.y).radians;
+
+    if (rad < Math.PI * -0.5) rad+=Math.PI*2;
+
+    var zone = Math.floor(scale(rad, Math.PI * -0.5, Math.PI * 1.5, 1, 8));
+
+    // $("#log").text([pos.x, pos.y, zone]);
+  
+    multi_hilight(zone, car2pol(pos.x, pos.y).distance);
+  
+  }
+
+  var deg_scale = 1.4;
+
+  function init_fns () {
+    for (i=1; i<=7; i++) {
+      var elt = $("#fn" + i)
+      var angle = scale(i, 1, 8, Math.PI * -0.3, Math.PI * 1.7);
+      position_in_main(elt, pol2car(0.25, angle))
+      elt.css("background-color", colors[i-1]);
+      // elt.css('transform', 'scale(' + deg_scale + ')');
+    } 
+  }
+
+  var padding = 50;
+
+  function update_main() {
+    var height = $(window).height() - padding;
+    $('#main')
+    .css('height', height)
+    .css('width', height)
+    .css('top', padding/2);
+  }
+
+  function update_display() {
+
+    update_main();
+    resize_canvas();
+    init_fns();
+    degree_zone(mouse_pos);
+    draw_in_canvas();
+  }
+
+  function resize_canvas(){
+
+    canvas.width = $("#main").width();
+    canvas.height = $("#main").height();
+
+  }
+
+  function draw_in_canvas(){
+
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+
+      for (k in radii) {
+
+        context.beginPath();
+        context.arc(centerX, centerY, canvas.width/2*radii[k], 0, 2 * Math.PI, false);
+        context.lineWidth = 3;
+        context.strokeStyle = '#ddd';
+        context.stroke();
+      }
+  }
+
+ $(document).ready(function(){
+
+  update_display();
+  
+  $("#main").mousemove(function( event ) {
+     var offset = $(this).offset();
+     var x = event.pageX- offset.left;
+     var y = event.pageY- offset.top;
+
+    mouse_pos = {x: scale(x, 0, $("#main").width(), -1, 1),
+                 y: scale(y, 0, $("#main").height(), -1, 1)};
+
+    update_display();
+
+  });
+
+  $(window).resize( update_display );
+
+});
+</script>
+</head>
+
+<body onresize="resize_canvas()">
+  <!--   
+
+    <div class="text-center">
+      <h2>move mouse to turn scale degrees on and off</h2>
+    </div> -->
+
+    <div id="main">
+
+      <canvas id="canvas">Your browser doesn't support canvas</canvas>
+
+      <div id="log"></div>
+
+      <div class="floating-number" id="fn1">F</div>
+      <div class="floating-number" id="fn2">C</div>
+      <div class="floating-number" id="fn3">S</div>
+      <div class="floating-number" id="fn4">B</div>
+      <div class="floating-number" id="fn5">D</div>
+      <div class="floating-number" id="fn6">K</div>
+      <div class="floating-number" id="fn7">V</div>
+
+    </div>
+</body>
+
+
+
+
+
+
+
+
+
+
+

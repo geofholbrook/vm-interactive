@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- jquery -->
+  <script src="scripts/jquery-3.1.1.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <!-- <link rel="stylesheet" href="scripts/bootstrap.min.css">
+  <script src="scripts/bootstrap.min.js"></script>
+ -->
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+  <script>
+
+  var slider_positions = [0, 0, 0];
+
+  var colors = ["blue", "red", "lightgreen"];
+
+  function set_stripe(row, stripe, color)
+  {
+    select = "#row" + row + "-" + stripe;
+
+    console.log(select, color);
+
+    $(select).css("background-color", color);
+  }
+
+
+  function update_rainbow () {
+    var value_colors = [ [], [], [], [] ];
+
+    for (i in slider_positions) {
+      value_colors[ slider_positions[i] ].push (colors[i]);
+    }
+
+    for (k in value_colors) {
+      for (j=0;j<3;j++) {
+        set_stripe(k, j, "white");
+      }
+
+      if (value_colors[k].length == 1) {
+        for (j=0;j<3;j++) {
+          set_stripe(k, j, value_colors[k][0]);
+        }
+      }
+      else
+        for (j in value_colors[k]) {
+          set_stripe(k, j, value_colors[k][j])
+        }
+
+    }
+
+    console.log(value_colors);
+  }
+
+
+
+  $(document).ready(function(){
+
+    $(".slider-knob").draggable({
+      containment: "parent",
+      axis: "y",
+      grid: [1, 75],
+
+      stop: function (e, ui) {
+        var idn = parseInt( ui.helper.attr("id")[4] );
+        slider_positions[idn] = 3 - ( ( Math.round(ui.position.top) - 4) / 75 );
+
+        // console.log( slider_positions );
+        update_rainbow();
+      }
+    });
+
+
+
+  });
+  </script>
+
+<style>
+  #display {
+   
+  }
+
+  #control {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 400[x];
+
+    background-color: black;
+  }
+
+  img {
+    height: 150px;
+  }
+
+  .cell {
+    width:150px;
+  }
+
+  .row {
+    position: relative;
+    height: 200px;
+    margin: 0 auto;
+    width: 80%;
+  }
+
+  td {
+    width: 150px;
+  }
+
+  .table-container {
+    position:relative;
+    left: 200px;
+    top:-150px;
+  }
+
+  .rowstripe {
+    z-index: 1;
+    width: 100%;
+    height:50px;
+  }
+
+  /*#row2-1 {
+    background-color: blue;
+  }
+
+  #row2-2 {
+    background-color: red;
+  }
+
+  #row2-3 {
+    background-color: green;
+  }
+*/
+  .slider {
+    display: inline-table;
+    height: 308px;
+    width: 50px;
+    background-color: lightgray;
+    position:relative;
+    margin: 25px;
+
+    box-shadow: 0px 0px 10px white;
+  }
+
+  .slider-knob {
+    height: 75px;
+    width: 42px;
+    position:absolute;
+    bottom:4px;
+    left:4px;
+
+    box-shadow: 0px 0px 10px grey;
+  }
+
+
+
+</style>
+
+</head>
+
+
+
+<body>
+  <div id="display">
+    <div class="row" id="row1">
+      
+      <div class="rowstripe" id="row1-0"></div>
+      <div class="rowstripe" id="row1-1"></div>
+      <div class="rowstripe" id="row1-2"></div>
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+        </tr>
+      </table></div>
+    </div>
+
+    <div class="row" id="row2">
+
+      <div class="rowstripe" id="row2-0"></div>
+      <div class="rowstripe" id="row2-1"></div>
+      <div class="rowstripe" id="row2-2"></div>
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+        </tr>
+      </table></div>
+    </div>
+    
+    <div class="row" id="row3">
+
+      <div class="rowstripe" id="row3-0"></div>
+      <div class="rowstripe" id="row3-1"></div>
+      <div class="rowstripe" id="row3-2"></div>
+
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+        </tr>
+      </table></div>
+    </div>
+
+  </div>
+
+  <div id="control">
+
+    <div style="margin: 0 auto">
+
+      <div class="slider">
+        <div class="slider-knob" id="knob0" style="background-color: blue">
+         </div>
+      </div>
+
+      <div class="slider">
+        <div class="slider-knob" id="knob1" style="background-color: red">
+         </div>
+      </div>
+      
+      <div class="slider">
+        <div class="slider-knob" id="knob2" style="background-color: green">
+         </div>
+      </div>
+
+    </div>
+
+  </div> 
+
+
+</body>
