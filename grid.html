@@ -15,6 +15,10 @@
 
   <style>
 
+	body {
+	  background-color: #222;
+	}
+
   table {
   	margin: auto;
   }
@@ -26,24 +30,63 @@
 
   	margin: 5px;
 
-  	color: #eee;
+  	color: black;
+
+  	cursor: pointer;
+  }
+
+  .c-instr {
+  	color: lightgreen;
+  }
+
+  .f-instr {
+  	color: yellow;
   }
 
   </style>
 
   <script>
 
+  function assign_letter_ids () {
+  	var arr = $(".letter").get();
+
+  	for (i in arr) {
+  		arr[i].setAttribute("id", "lett-" + i);
+  	}
+  }
+
+  function corresponding_div (elt) {
+  	var n = parseInt( elt.attr("id").slice(5) );
+  	var cn = (n+15) % 30;
+
+  	return $("#lett-" + cn);
+
+  }
+
+  function flip_color(elt) {
+
+  	if (elt.css("color") == "rgb(0, 0, 0)") 
+  		{ var color;
+  		  if (elt.closest("table").attr("id") == "c-instr")
+  		  {color="lightgreen"} else {color="yellow"};
+
+  		  elt.css("color", color) }
+  		else
+  		{ elt.css("color", "black") }	
+  }
+
   $(document).ready(function(){
 
   	$(".letter").click( function() {
   		
-  		console.log( $(this).css("color") );
-
-  		if ($(this).css("color") == "rgb(0, 0, 0)") 
-  		{ $(this).css("color", "#eee") }
-  		else
-  		{ $(this).css("color", "black") }
+  		// console.log( $(this).css("color") );
+  		flip_color($(this));
+  		flip_color( corresponding_div( $(this) ) );
+  		
   	});
+
+  	assign_letter_ids();
+
   });
 
   </script>
@@ -52,7 +95,9 @@
 </head>
 
 <body>
-  <table>
+  <span>
+
+  <table><tr><td><table id="c-instr" style="margin-right:200px">
   	<tr>
   		<td><div class="letter">C</div></td>
   		<td><div class="letter">D</div></td>
@@ -76,5 +121,32 @@
   		<td><div class="letter">F</div></td>
   		<td><div class="letter">G</div></td>
   	</tr>
-  </table>
+  </table></td>
+  
+  <td><table id="f-instr">
+  	<tr>
+  		<td><div class="letter">G</div></td>
+  		<td><div class="letter">A</div></td>
+  		<td><div class="letter">B</div></td>
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">D</div></td>
+  	</tr>
+
+  	<tr>
+  		<td><div class="letter">G</div></td>
+  		<td><div class="letter">A</div></td>
+  		<td><div class="letter">B</div></td>
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">D</div></td>
+  	</tr>
+
+  	<tr>
+  		<td><div class="letter">G</div></td>
+  		<td><div class="letter">A</div></td>
+  		<td><div class="letter">B</div></td>
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">D</div></td>
+  	</tr>
+  </table></td></tr></table>
+
  </body>
