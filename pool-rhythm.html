@@ -116,8 +116,10 @@
     var elt = $("#fn" + deg);
     if (on) { 
         elt.css({ backgroundColor: colors[deg-1] });
+        elt.attr("data_light", "1");
       }
-      else elt.css({backgroundColor: "#ddd"})
+      else { elt.css({ backgroundColor: "#ddd" });
+             elt.attr("data_light", "0") }
   }
 
   function mod2deg (deg) {
@@ -244,10 +246,16 @@
   });
 
   $(".floating-number").find("img").attr("data_nv", 1);
-  $(".floating-number").click( function( event ) {
-    var img = $(this).find("img");
-    img.attr("data_nv", (img.attr("data_nv") + 1) % 3);
-    img.attr("src", nv_source[ img.attr("data_nv") ]);
+  $("#main").click( function( event ) {
+    
+    $(".floating-number").each( function(i, elt) {
+      if ($(this).attr("data_light") == 1)
+      {
+        var img = $(this).find("img");
+        img.attr("data_nv", (img.attr("data_nv") + 1) % 3);
+        img.attr("src", nv_source[ img.attr("data_nv") ]);
+      }
+    });
   });
 
   $( "body" ).keydown(function(e) {
