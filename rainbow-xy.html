@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- jquery -->
+  <script src="scripts/jquery-3.1.1.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <!-- <link rel="stylesheet" href="scripts/bootstrap.min.css">
+  <script src="scripts/bootstrap.min.js"></script>
+ -->
+  <!-- jquery UI -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <!-- local scripts -->
+  <script src="scripts/vexflow-min.js"></script>
+  <script src="scripts/geof.js"></script>
+
+ 
+
+<style>
+  #display {
+   
+  }
+
+  #control {
+    position: fixed;
+    bottom: 0px;
+    width: 98%;
+    height: 400px;
+    margin: 0 auto;
+
+    border:solid;
+    /*padding: 5px;*/
+
+    background-image: url("images/20-brushed-seamless-texture.jpg");
+    background-repeat:repeat;
+  }
+
+  img {
+    height: 125px;
+  }
+
+  .cell {
+    width:150px;
+  }
+
+  .row {
+    position: relative;
+    height: 125px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    width: 80%;
+  }
+
+  td {
+    width: 150px;
+  }
+
+  .table-container {
+    position:absolute;
+    top:25px;
+    left: 200px;
+    /*top:-150px;*/
+  }
+
+  .rowstripe {
+    z-index: 1;
+    width: 100%;
+    height:50px;
+
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    font-family: arial;
+  }
+
+  /*#row2-1 {
+    background-color: blue;
+  }
+
+  #row2-2 {
+    background-color: red;
+  }
+
+  #row2-3 {
+    background-color: green;
+  }
+*/
+  #sliders {
+    margin: auto;
+    width: 1000px;
+  }
+
+  .slider {
+    display: inline-table;
+    height: 308px;
+    width: 250px;
+    background-color: lightgray;
+    position:relative;
+    margin: 25px;
+    box-shadow: 0px 0px 10px white;
+  }
+
+  .slider-knob {
+    height: 75px;
+    width: 67px;
+    position:absolute;
+    top:4px;
+    right:4px;
+
+    box-shadow: 0px 0px 10px grey;
+  }
+
+  .text-controls {
+    position: absolute;
+    top:0;
+
+  }
+
+
+</style>
+
+
+ <script>
+
+  var slider_positions = [ {x: 1, y: 0}, {x: 1, y: 0}, {x: 1, y: 0} ];
+
+  var colors = ["white", "#6699ff", "#cc00ff", "#ff5c33"];
+
+  var texts = ["", "", ""];
+
+ 
+
+ function set_stripe(row, stripe, i, notext)
+  {
+    
+    var num = parseInt(i) + 1;
+    var vol = 
+
+    select = "#row" + row + "-" + stripe;
+
+    // console.log(select, color);
+
+    $(select).css("background-color", colors[num]);
+    if (!notext) { $(select).html( texts[i] ); } else $(select).html("");
+
+    //set width
+    if (i != -1) $(select).css("width", Math.round( (slider_positions[i].x * 90) + 10 ) + "%");
+  }
+
+  function update_rainbow () {
+    var value_colors = [ [], [], [], [] ];
+
+    for (i in slider_positions) {
+      value_colors[ slider_positions[i].y ].push (i);
+    }
+
+    for (k in value_colors) {
+      for (j=0;j<3;j++) {
+        set_stripe(k, j, -1);
+      }
+
+      if (value_colors[k].length == 1) {
+        for (j=0;j<3;j++) {
+          set_stripe(k, j, value_colors[k][0], (j>0));
+        }
+      }
+      else
+        for (j in value_colors[k]) {
+          set_stripe(k, j, value_colors[k][j])
+        }
+
+    }
+
+    // console.log(value_colors);
+  }
+
+  var num_knobs = 3;
+
+  function set_knob_colors () {
+    for (k=0;k<num_knobs;k++) {
+      $("#knob" + k).css("background-color", colors[k+1])
+    }
+  }
+
+  function text_submit() {
+    // lazy!
+    texts[0] = $("#red-text").val();
+    texts[1] = $("#purple-text").val();
+    texts[2] = $("#blue-text").val();
+
+    update_rainbow();
+  }
+
+  $(document).ready(function(){
+
+    $(".slider-knob").draggable({
+      containment: "parent",
+      grid: [1, 75],
+
+      drag: function (e, ui) {
+        var idn = parseInt( ui.helper.attr("id")[4] );
+        slider_positions[idn] = { x: ui.position.left / 183,
+                                  y: ( Math.round(ui.position.top) - 4) / 75  };
+
+        // console.log( slider_positions );
+        update_rainbow();
+      }
+    });
+
+    set_knob_colors();
+    update_rainbow();
+
+  });
+  </script>
+</head>
+
+
+
+<body>
+  <div id="display">
+    <div class="row" id="row0">
+      
+      <div class="rowstripe" id="row0-0"></div>
+      <div class="rowstripe" id="row0-1"></div>
+      <div class="rowstripe" id="row0-2"></div>
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+          <td><span class="cell"><img src="images/rest.png"></span></td>
+        </tr>
+      </table></div>
+    </div>
+
+    <div class="row" id="row1">
+
+      <div class="rowstripe" id="row1-0"></div>
+      <div class="rowstripe" id="row1-1"></div>
+      <div class="rowstripe" id="row1-2"></div>
+
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+          <td><span class="cell"><img src="images/half.png"></span></td>
+          <td><span class="cell"></span></td>
+
+        </tr>
+      </table></div>
+
+    </div>
+
+    <div class="row" id="row2">
+
+      <div class="rowstripe" id="row2-0"></div>
+      <div class="rowstripe" id="row2-1"></div>
+      <div class="rowstripe" id="row2-2"></div>
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+          <td><span class="cell"><img src="images/quarter.png"></span></td>
+        </tr>
+      </table></div>
+    </div>
+    
+    <div class="row" id="row3">
+
+      <div class="rowstripe" id="row3-0"></div>
+      <div class="rowstripe" id="row3-1"></div>
+      <div class="rowstripe" id="row3-2"></div>
+
+
+      <div class="table-container"><table>
+        <tr>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+          <td><span class="cell"><img src="images/eighths.png"></span></td>
+        </tr>
+      </table></div>
+
+    </div>
+
+  </div>
+
+  <div id="control">
+
+    <div id="sliders">
+
+      <div class="slider">
+        <div class="slider-knob" id="knob0">
+         </div>
+      </div>
+
+      <div class="slider">
+        <div class="slider-knob" id="knob1">
+         </div>
+      </div>
+      
+      <div class="slider">
+        <div class="slider-knob" id="knob2">
+         </div>
+      </div>
+    </div>
+
+    <div class="text-controls" style="display:inline">
+      <form>
+        RED:<br>
+        <input type="text" id="red-text" value="">
+        <br>
+        PURPLE:<br>
+        <input type="text" id="purple-text" value="">
+        <br>
+        BLUE:<br>
+        <input type="text" id="blue-text" value="">
+        <br>
+
+        <br>
+        <input type="button" value="Update" onclick="text_submit()">
+      </form> 
+    </div>
+
+  </div> 
+
+
+</body>

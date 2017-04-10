@@ -63,6 +63,21 @@
 
   }
 
+  function switch_note(elt) {
+  	switch (elt.html()) {
+  		case "E": elt.html("D");
+  		case "D": elt.html("E");
+  		case "G": elt.html("F");
+  		case "F": elt.html("G");  		
+  	}
+  }
+
+  function switch_harmony() {
+  	$(".letter").each( function(index) {
+  		switch_note( $(this) );
+  	});	
+  }
+
   function flip_color(elt) {
 
   	if (elt.css("color") == "rgb(0, 0, 0)") 
