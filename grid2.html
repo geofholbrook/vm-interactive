@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- jquery -->
+  <script src="scripts/jquery-3.1.1.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="scripts/bootstrap.min.css">
+  <script src="scripts/bootstrap.min.js"></script>
+
+
+  <style>
+
+	body {
+	  background-color: #222;
+	}
+
+  table {
+  	margin: auto;
+  }
+
+  .letter {
+  	font-size: 150px;
+  	font-weight: bold;
+  	font-family: arial;
+
+  	margin-right: 50px;
+
+    height: 150px;
+    width: 200px;
+  	color: black;
+
+  	cursor: pointer;
+  }
+
+
+  </style>
+
+  <script>
+
+  var colors = ["lightblue", "lightgreen", "yellow", "orange", "red"];
+
+  function assign_letter_ids () {
+  	var arr = $(".letter").get();
+
+  	for (i in arr) {
+  		arr[i].setAttribute("id", "lett-" + i);
+      arr[i].setAttribute("data_light", "0");
+  	}
+  }
+
+  function switch_harmony() {
+  	$(".letter").each( function(index) {
+  		switch_note( $(this) );
+  	});	
+  }
+
+  function flip_color(elt) {
+
+  	if (elt.attr("data_light") == 0) 
+  		{ var rownum = parseInt(elt.closest("tr").attr("id").slice(3));
+        elt.css("color", colors[rownum - 1]);
+        elt.attr("data_light", 1); }
+  		else
+  		{ elt.css("color", "black");
+        elt.attr("data_light", 0) }	
+  }
+
+  $(document).ready(function(){
+
+  	$(".letter").click( function() {
+  		// console.log( $(this).css("color") );
+  		flip_color($(this));
+  	});
+
+  	assign_letter_ids();
+
+  });
+
+  </script>
+
+
+</head>
+
+<body>
+<h3 class="text-center" style="color:white">click on notes to light them up</h3>
+
+<table id="c-instr">
+  	<tr id="row1">
+  		<td><div class="letter">Bb</div></td>
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">Eb</div></td>
+  		<td><div class="letter">G</div></td>
+  		<td><div class="letter">Bb</div></td>
+  	</tr>
+
+    <tr id="row2">
+      <td><div class="letter">Bb</div></td>
+      <td><div class="letter">C</div></td>
+      <td><div class="letter">Eb</div></td>
+      <td><div class="letter">G</div></td>
+      <td><div class="letter">Bb</div></td>
+    </tr>
+
+  	<tr id="row3">
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">D</div></td>
+  		<td><div class="letter">F</div></td>
+  		<td><div class="letter">A</div></td>
+  		<td><div class="letter">C</div></td>
+  	</tr>
+
+    <tr id="row4">
+      <td><div class="letter">C</div></td>
+      <td><div class="letter">D</div></td>
+      <td><div class="letter">F</div></td>
+      <td><div class="letter">A</div></td>
+      <td><div class="letter">C</div></td>
+    </tr>
+
+  	<tr id="row5">
+  		<td><div class="letter">G</div></td>
+  		<td><div class="letter">A</div></td>
+  		<td><div class="letter">C</div></td>
+  		<td><div class="letter">E</div></td>
+  		<td><div class="letter">G</div></td>
+  	</tr>
+  </table>
+
+ </body>
