@@ -33,6 +33,12 @@
     position: relative;
   }
 
+  #control {
+    position:fixed;
+    top:0px;
+    color:white;
+  }
+
   canvas {
     width: 100%;
     height: 100%;
@@ -74,7 +80,7 @@
 
 <script>
 
-  var nv_source = [ "quarter.png", "accel.png", "decel.png", "coda.png", "trill.png", "threedots.png" ];
+  var nv_source = [ "quarter.png", "accel.png", "decel.png", "circling.png", "trill.png", "question.png", "wind.png" ];
 
   var colors = [ "red", "#fe0", "darkgreen", "pink", "orange", "blue", "purple"  ];
 
@@ -232,6 +238,14 @@
       }
   }
 
+ function create_checkboxes () {
+   for (i in nv_source) {
+    $("#control").append("<input type=\"checkbox\" name=\"" + nv_source[i] +
+              "\" checked=\"checked\">" + nv_source[i] + "<br>");
+   }
+
+ }
+
  $(document).ready(function(){
 
   update_display();
@@ -284,8 +298,12 @@
 
     });
 
+  create_checkboxes();
+
   init_fns();
   $(window).resize( function() { init_fns(); update_display() } );
+
+
 
 });
 </script>
@@ -313,6 +331,15 @@
       <div class="floating-number" id="fn7"><img src="images/quarter.png" height="50"></div>
 
     </div>
+
+    <div id="control">
+
+      <form id="repertoire" action="">
+      </form>
+    </div>
+
+</form>
+
 </body>
 
 
