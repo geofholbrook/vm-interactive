@@ -80,8 +80,8 @@
 
 <script>
 
-  var nv_source = [ "quarter.png", "accel.png", "decel.png", "circling.png", "trill.png", "question.png", "wind.png" ];
-
+  var nv_source = [ "quarter", "accel", "decel", "circling", "trill", "question", "wind" ];
+  var nv_enabled = nv_source;
   var colors = [ "red", "#fe0", "darkgreen", "pink", "orange", "blue", "purple"  ];
 
   var mouse_pos = {x:0, y:0};
@@ -240,11 +240,22 @@
 
  function create_checkboxes () {
    for (i in nv_source) {
-    $("#control").append("<input type=\"checkbox\" name=\"" + nv_source[i] +
+    $("#control").append("<input id = \"" + nv_source[i] + "\" type=\"checkbox\" name=\"" + nv_source[i] +
               "\" checked=\"checked\">" + nv_source[i] + "<br>");
    }
 
  }
+
+ function read_checkboxes () {
+   nv_enabled = [];
+
+   for (i in nv_source) {
+      if ($("#" + nv_source[i]).is(':checked')) {
+        nv_enabled.push ( nv_source[i] );
+      }
+   }    
+ }
+
 
  $(document).ready(function(){
 
@@ -263,6 +274,7 @@
 
   });
 
+  
   $(".floating-number").find("img").attr("data_nv", 1);
   $("#main").click( function( event ) {
     
@@ -277,8 +289,8 @@
           n = parseInt (img.attr("data_nv"));
         }
 
-        img.attr("data_nv", (n + 1) % nv_source.length);
-        img.attr("src", "images/" + nv_source[ img.attr("data_nv") ]);
+        img.attr("data_nv", (n + 1) % nv_enabled.length);
+        img.attr("src", "images/" + nv_enabled [ img.attr("data_nv") ] + ".png");
 
       }
     });
@@ -299,6 +311,8 @@
     });
 
   create_checkboxes();
+
+  $(":checkbox").click( read_checkboxes  );
 
   init_fns();
   $(window).resize( function() { init_fns(); update_display() } );
